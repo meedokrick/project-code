@@ -1,18 +1,18 @@
-//**** Password based Solenoid door lock system using Arduino ****//
+//Password based Solenoid door lock system using Arduino
 
-#include <Wire.h>
 #include <Keypad.h>
 #include <EEPROM.h>
 #include <LiquidCrystal_I2C.h>
+#include <SoftwareSerial.h>
  
 int Lock4 = 10;
-int Lock = 11;    // relay
+int Lock = 11;
 int Lock2 = 12;
 int Lock3 = 13;
 const byte numRows= 4;          //number of rows on the keypad
 const byte numCols= 4;          //number of columns on the keypad
 
-int drawerSelect = A2;
+int drawerSelect;
 String sender;
 char keymap[numRows][numCols]= 
 {
@@ -22,8 +22,8 @@ char keymap[numRows][numCols]=
 {'*', '0', '#', 'D'}
 };
  
-char keypressed;                 //Where the keys are stored it changes very often
-char code[]= {'1','2','3','4'};  //The default code, you can change it or make it a 'n' digits one
+char keypressed;                 //Where the keys are stored
+char code[]= {'1','2','3','4'};  //The default code
  
 char check1[sizeof(code)];  //Where the new key is stored
 char check2[sizeof(code)];  //Where the new key is stored again so it's compared to the previous one
@@ -36,9 +36,12 @@ byte colPins[numCols]= {5,4,3,2}; //Columns 0 to 3
 Keypad myKeypad= Keypad(makeKeymap(keymap), rowPins, colPins, numRows, numCols);
 LiquidCrystal_I2C lcd(0x27, 16, 2); // I2C address 0x27, 16 column and 2 rows
  
+SoftwareSerial Serial1 (A3, A2); //Rx, Tx
+
 void setup()
 {
-  Wire.begin();
+  Serial1.begin(9600);
+  // Wire.begin();
   lcd.init();                    // initialize the lcd
   lcd.backlight();
   lcd.print("Welcome!");
@@ -60,8 +63,18 @@ void setup()
  
 void loop()
 {
-  Wire.beginTransmission(4);
   LockControl();
+
+  ReadSerialCommunication();
+}
+
+void ReadSerialCommunication(){
+  if(Serial1.available() > 0){
+    switch(Serial1.read()){
+      case 'A':
+        break;
+    }
+  }
 }
 
 void LockControl()                      //to control the keypad and lock
@@ -217,16 +230,17 @@ void drawerOpen() {
             ReadCode();                          //Getting code function
                   if(a==sizeof(code))           //The ReadCode function assign a value to a (it's correct when it has the size of the code array)
                   OpenLock1();                   //Open lock function if code is correct
-                  Wire.write(OpenDrawer1());                  //Open drawer function if code is correct
+                  Serial1.println('1');        //Open drawer function if code is correct
                   lcd.clear();
-                  lcd.display("Press C to close")
-                  if (keypressed == 'C') {
-                    Wire.write(closeDrawer1());
-                  }
+                  lcd.print("Press C to close");
+                  keypressed = myKeypad.getKey();
+                    if (keypressed == 'C') {
+                      Serial1.println('11');
+                    }
                   else{
                   lcd.clear();               
                   lcd.print("Wrong code");          //Message to print when the code is wrong
-          lcd.setCursor(0,1);
+                  lcd.setCursor(0,1);
                   lcd.print("Press * to Unlock");
                   }
             delay(2000);
@@ -242,16 +256,17 @@ void drawerOpen() {
             ReadCode();                          //Getting code function
                   if(a==sizeof(code))           //The ReadCode function assign a value to a (it's correct when it has the size of the code array)
                   OpenLock2();                   //Open lock function if code is correct
-                  Wire.write(OpenDrawer2());
+                  Serial1.println('2');        //Open drawer function if code is correct
                   lcd.clear();
-                  lcd.display("Press C to close")
-                  if (keypressed == 'C') {
-                    Wire.write(closeDrawer2());
-                  }
+                  lcd.print("Press C to close");
+                  keypressed = myKeypad.getKey();
+                    if (keypressed == 'C') {
+                      Serial1.println('12');
+                    }
                   else{
                   lcd.clear();               
                   lcd.print("Wrong code");          //Message to print when the code is wrong
-          lcd.setCursor(0,1);
+                  lcd.setCursor(0,1);
                   lcd.print("Press * to Unlock");
                   }
             delay(2000);
@@ -267,16 +282,17 @@ void drawerOpen() {
             ReadCode();                          //Getting code function
                   if(a==sizeof(code))           //The ReadCode function assign a value to a (it's correct when it has the size of the code array)
                   OpenLock3();                   //Open lock function if code is correct
-                  Wire.write(OpenDrawer3());
+                  Serial1.println('3');        //Open drawer function if code is correct
                   lcd.clear();
-                  lcd.display("Press C to close")
-                  if (keypressed == 'C') {
-                    Wire.write(closeDrawer3());
-                  }
+                  lcd.print("Press C to close");
+                  keypressed = myKeypad.getKey();
+                    if (keypressed == 'C') {
+                      Serial1.println('13');
+                    }
                   else{
                   lcd.clear();               
                   lcd.print("Wrong code");          //Message to print when the code is wrong
-          lcd.setCursor(0,1);
+                  lcd.setCursor(0,1);
                   lcd.print("Press * to Unlock");
                   }
             delay(2000);
@@ -292,12 +308,13 @@ void drawerOpen() {
             ReadCode();                          //Getting code function
                   if(a==sizeof(code))           //The ReadCode function assign a value to a (it's correct when it has the size of the code array)
                   OpenLock4();                   //Open lock function if code is correct
-                  Wire.write(OpenDrawer4());
+                  Serial1.println('4');        //Open drawer function if code is correct
                   lcd.clear();
-                  lcd.display("Press C to close")
-                  if (keypressed == 'C') {
-                    Wire.write(closeDrawer4());
-                  }
+                  lcd.print("Press C to close");
+                  keypressed = myKeypad.getKey();
+                    if (keypressed == 'C') {
+                      Serial1.println('14');
+                    }
                   else{
                   lcd.clear();               
                   lcd.print("Wrong code");          //Message to print when the code is wrong
